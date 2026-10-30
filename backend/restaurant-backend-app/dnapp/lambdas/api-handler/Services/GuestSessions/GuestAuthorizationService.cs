@@ -1,6 +1,7 @@
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using APIHandler.Helpers;
+using System;
 using System.Threading.Tasks;
 
 namespace APIHandler.Services.GuestSessions;
@@ -17,7 +18,19 @@ public class GuestAuthorizationService(IGuestSessionService guestSessionService)
             return CreateErrorResponse(context);
 
         string token = authorizationValue[BearerString.Length..];
-        bool authorized = await guestSessionService.IsAuthorizedAsync(token, guestSessionid);
+        bool authorized = false;
+        try
+        {
+            authorized = await guestSessionService.IsAuthorizedAsync(token, guestSessionid);
+        }
+        catch (FormatException)
+        {
+            // Cognito JWTs are not guest-session tokens; try owner authorization below.
+        }
+        catch (ArgumentException)
+        {
+            // Malformed bearer values must not turn into a server error.
+        }
         if (!authorized)
         {
             string? userId = UserContextHelper.GetAuthenticatedUserId(request);

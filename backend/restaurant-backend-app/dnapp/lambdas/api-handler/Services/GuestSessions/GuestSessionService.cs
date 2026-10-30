@@ -236,7 +236,7 @@ public class GuestSessionService(
             throw new ActionForbiddenException("Only the reservation owner can perform this action.");
 
         var submitted = (await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservationId))
-            .Where(s => s.IsSubmitted).ToList();
+            .Where(s => s.IsSubmitted || (s.IsOwnerSession && s.Dishes?.Count > 0)).ToList();
         if (submitted.Count == 0)
             throw new ValidationException("No submitted guest sessions were found.");
 

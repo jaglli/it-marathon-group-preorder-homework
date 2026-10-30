@@ -471,6 +471,7 @@ public class GuestSessionServiceTests
 
         Assert.False(result);
     }
+
     [Theory]
     [AutoData]
     public async Task SubmitCartAsync_Valid_SubmitsSuccessfuilly(GuestSession guestSession, GroupReservation groupReservation, Dish[] dishes)
@@ -730,8 +731,6 @@ public class GuestSessionServiceTests
         };
     }
 }
-
-
 
 
 
