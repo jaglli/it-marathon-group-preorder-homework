@@ -18,6 +18,12 @@ public class GuestAuthorizationService(IGuestSessionService guestSessionService)
 
         string token = authorizationValue[BearerString.Length..];
         bool authorized = await guestSessionService.IsAuthorizedAsync(token, guestSessionid);
+        if (!authorized)
+        {
+            string? userId = UserContextHelper.GetAuthenticatedUserId(request);
+            authorized = userId is not null
+                && await guestSessionService.IsOwnerAuthorizedAsync(userId, guestSessionid);
+        }
 
         return !authorized ? CreateErrorResponse(context) : null;
     }

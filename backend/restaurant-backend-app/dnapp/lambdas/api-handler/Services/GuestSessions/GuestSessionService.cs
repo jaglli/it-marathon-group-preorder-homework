@@ -43,6 +43,14 @@ public class GuestSessionService(
         return guestSession.Id == guestSessionId;
     }
 
+    public async Task<bool> IsOwnerAuthorizedAsync(string userId, string guestSessionId)
+    {
+        GuestSession? session = await guestSessionRepository.GetByGuestSessionId(guestSessionId);
+        return session is not null
+            && session.IsOwnerSession
+            && string.Equals(session.OwnerUserId, userId, StringComparison.OrdinalIgnoreCase);
+    }
+
     public async Task<CreatGuestSessionResponse> CreateGuestSessionAsync(CreateGuestSessionRequest request)
     {
         GroupReservation group = await GetGroupReservationAndValidateAsync(request.GroupReservationId);
@@ -186,6 +194,11 @@ public class GuestSessionService(
             throw new ValidationException("Guest session does not belong to this group reservation.");
         }
 
+        if (session.IsOwnerSession)
+        {
+            throw new ValidationException("The owner session cannot be removed.");
+        }
+
         await guestSessionRepository.DeleteAsync(session);
 
         return await BuildSnapshotAsync(groupReservationId);
@@ -309,9 +322,8 @@ public class GuestSessionService(
     {
         var sessions = await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservationId);
 
-        // Owner is always 1 active participant. 
-        // If sessions is null/empty, it safely evaluates to 0 joined guests + 1 owner = 1.
-        return (sessions?.Count ?? 0) + 1;
+        // The owner session is stored in the same table but is not a guest participant.
+        return (sessions?.Count(session => !session.IsOwnerSession) ?? 0) + 1;
     }
 
     private async Task ValidateGroupReservationId(string groupReservationId) => await GetGroupReservationAndValidateAsync(groupReservationId);
@@ -428,4 +440,3 @@ public class GuestSessionService(
     }
 
 }
-

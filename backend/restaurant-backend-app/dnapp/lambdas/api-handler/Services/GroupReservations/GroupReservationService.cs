@@ -10,6 +10,7 @@ using APIHandler.Repositories.Tables;
 using APIHandler.Services.Auth;
 using APIHandler.Services.Locations;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace APIHandler.Services.GroupReservations;
@@ -32,14 +33,8 @@ public class GroupReservationService(
         if (groupReservation.Status != GroupReservationStatus.Open)
             throw new GroupReservationExpiredException();
 
-        Task<Reservation?> reservationTask = reservationRepository.GetReservationByIdAsync(groupReservation.ReservationId);
-        Task<int> countTask = guestSessionRepository.CountByGroupReservationId(groupReservation.GroupReservationId);
-
-        Reservation reservation = await reservationTask ?? throw new ValidationException("Associated reservation not found.");
-        int joinedGuestsCount = await countTask;
-
-        if (joinedGuestsCount + 1 >= reservation.GuestCount)
-            throw new GuestLimitExceededException();
+        Reservation reservation = await reservationRepository.GetReservationByIdAsync(groupReservation.ReservationId)
+            ?? throw new ValidationException("Associated reservation not found.");
 
         Table table = await tableRepository.GetTableAsync(reservation.TableId)
             ?? throw new InvalidOperationException("Associated table not found.");
@@ -89,9 +84,34 @@ public class GroupReservationService(
     {
         GroupReservation? group = await groupReservationRepository.GetByReservationIdAsync(reservationId);
         if (group is not null)
+        {
+            await EnsureOwnerSessionAsync(userId, group.GroupReservationId);
             return;
+        }
 
-        await CreateGroupReservationAsync(reservationId);
+        group = await CreateGroupReservationAsync(reservationId);
+        await EnsureOwnerSessionAsync(userId, group.GroupReservationId);
+    }
+
+    private async Task EnsureOwnerSessionAsync(string userId, string groupReservationId)
+    {
+        var sessions = await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservationId);
+        if (sessions.Any(session =>
+                session.IsOwnerSession &&
+                string.Equals(session.OwnerUserId, userId, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        await guestSessionRepository.SaveAsync(new GuestSession
+        {
+            Id = Guid.NewGuid().ToString(),
+            GroupReservationId = groupReservationId,
+            GuestName = "Owner",
+            Dishes = [],
+            IsOwnerSession = true,
+            OwnerUserId = userId,
+        });
     }
 
     public async Task UpdateGroupReservationStatusAsync(string groupReservationId, GroupReservationStatus status)
@@ -121,10 +141,13 @@ public class GroupReservationService(
         await groupReservationRepository.SaveGroupReservationAsync(groupReservation);
     }
 
-    public async Task<GetGroupInviteTokenResponse> GetGroupReservationInviteTokenAsync(string reservationId)
+    public async Task<GetGroupInviteTokenResponse> GetGroupReservationInviteTokenAsync(string userId, string reservationId)
     {
         var reservation = await reservationRepository.GetReservationByIdAsync(reservationId)
             ?? throw new ReservationNotFoundException($"Reservation {reservationId} was not found.");
+
+        if (!string.Equals(reservation.CustomerId, userId, StringComparison.OrdinalIgnoreCase))
+            throw new ActionForbiddenException("Only the reservation owner can perform this action.");
 
         if (reservation.GuestCount < 2)
             throw new ValidationException("Retrieving invitation token for the reservation with only one guest is not permitted.");
@@ -132,7 +155,13 @@ public class GroupReservationService(
         if (reservation.Status != ReservationStatus.Reserved)
             throw new GroupReservationExpiredException("The group reservation is expired.");
 
-        GroupReservation groupReservation = (await groupReservationRepository.GetByReservationIdAsync(reservationId))!;
+        GroupReservation? groupReservation = await groupReservationRepository.GetByReservationIdAsync(reservationId);
+        if (groupReservation is null)
+        {
+            groupReservation = await CreateGroupReservationAsync(reservationId);
+        }
+
+        await EnsureOwnerSessionAsync(userId, groupReservation.GroupReservationId);
 
         if (groupReservation.Status == GroupReservationStatus.Submitted)
             throw new GroupReservationSubmittedException();
@@ -143,4 +172,3 @@ public class GroupReservationService(
         return new GetGroupInviteTokenResponse(groupReservation.ReservationToken);
     }
 }
-
