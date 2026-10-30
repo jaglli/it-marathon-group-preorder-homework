@@ -24,3 +24,7 @@ node_modules/
 *.tfvars.json
 crash.log
 crash.*.log
+
+# Local deployment tools and plans
+syndicate_venv/
+tfplan
