@@ -27,6 +27,8 @@
     }
   </section>
 
+  <app-dish-assistant [dishes]="dishes" (addDish)="addDishToCart($event)"></app-dish-assistant>
+
   <section class="content-sections">
     <div class="menu-section">
       <div class="filter-sort-bar">

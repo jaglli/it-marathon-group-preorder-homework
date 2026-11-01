@@ -1,0 +1,54 @@
+<section class="assistant" aria-labelledby="dish-assistant-title">
+  <button class="assistant-toggle" type="button" (click)="opened.update((value) => !value)" [attr.aria-expanded]="opened()">
+    <span class="assistant-icon" aria-hidden="true">✦</span>
+    <span>
+      <strong id="dish-assistant-title">Dish assistant</strong>
+      <small>Find something that fits your taste</small>
+    </span>
+    <span class="chevron" aria-hidden="true">{{ opened() ? '⌃' : '⌄' }}</span>
+  </button>
+
+  @if (opened()) {
+    <div class="assistant-panel">
+      <label for="dish-preferences">What are you looking for?</label>
+      <input
+        id="dish-preferences"
+        type="text"
+        [ngModel]="preferences()"
+        (ngModelChange)="preferences.set($event)"
+        placeholder="Try: salad, light, vegetarian, spicy"
+      />
+
+      <div class="assistant-options">
+        <label for="dish-category">Type</label>
+        <select id="dish-category" [ngModel]="category()" (ngModelChange)="category.set($event)">
+          <option value="">Any type</option>
+          <option value="Appetizer">Appetizer</option>
+          <option value="MainCourse">Main course</option>
+          <option value="Dessert">Dessert</option>
+        </select>
+        <label for="dish-price">Max price</label>
+        <input id="dish-price" type="number" min="0" placeholder="$" (input)="updateMaxPrice($any($event.target).value)" />
+        <button class="clear-button" type="button" (click)="clear()">Clear</button>
+      </div>
+
+      @if (recommendations().length) {
+        <div class="recommendations">
+          <p>Recommended for you</p>
+          @for (dish of recommendations(); track dish.id) {
+            <article class="recommendation">
+              <img [src]="dish.imageUrl" [alt]="dish.name" />
+              <div>
+                <strong>{{ dish.name }}</strong>
+                <span>{{ dish.price | currency }}</span>
+              </div>
+              <button type="button" (click)="addDish.emit(dish)">Add</button>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="empty">No dishes match these preferences. Try a broader search.</p>
+      }
+    </div>
+  }
+</section>

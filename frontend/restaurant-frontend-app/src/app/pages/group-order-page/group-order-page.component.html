@@ -1,0 +1,113 @@
+@if (loading()) {
+  <main class="page"><p class="state">Loading group reservation…</p></main>
+} @else if (error()) {
+  <main class="page error-state">
+    <p>{{ error() }}</p>
+    <button type="button" (click)="load()">Try again</button>
+  </main>
+} @else {
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Group Pre-Order</p>
+        <h1>{{ invite()?.LocationAddress }}</h1>
+        <p>{{ invite()?.StartTime | date:'MMM d, y' }} · {{ invite()?.StartTime | date:'HH:mm' }}–{{ invite()?.EndTime | date:'HH:mm' }}</p>
+      </div>
+      <div class="header-meta">
+        <span class="status">{{ isSubmitted() ? 'Sent to Restaurant' : 'Collecting pre-orders' }}</span>
+        <span>{{ participants().length }} of {{ invite()?.MaxGuestCount }} guests</span>
+        @if (!isSubmitted()) {
+          <button type="button" (click)="chooseDishes()">Choose dishes</button>
+        }
+      </div>
+    </header>
+
+    @if (pendingCount()) {
+      <aside class="notice">{{ pendingCount() }} participant{{ pendingCount() === 1 ? " hasn't" : "s haven't" }} submitted their cart yet — their dishes won't be included in the order</aside>
+    }
+
+    <ul class="participants">
+      @for (person of participants(); track person.id) {
+        <li>
+          <app-participant-card
+            [participant]="person"
+            [isOwner]="person.id === ownerSessionId()"
+            [readyForSubmit]="person.id === ownerSessionId() && person.items.length > 0"
+            [canRemove]="person.type === 'Guest' && !isSubmitted()"
+            (removeClick)="askRemove($event)"
+          />
+        </li>
+      }
+    </ul>
+
+    @if (!hasParticipants()) {
+      <p class="empty-state">Participants haven't added any dishes yet</p>
+    } @else {
+      <section class="summary">
+        <h2>Consolidated pre-order</h2>
+        <ul>
+          @for (item of consolidated().items; track item.dish.id) {
+            <li>{{ item.dish.name }} × {{ item.quantity }}</li>
+          }
+        </ul>
+        <p class="grand-total"><span>Grand Total</span><strong>{{ consolidated().total | currency }}</strong></p>
+        @if (!isSubmitted()) {
+          <button type="button" [disabled]="!canSubmit()" (click)="confirmSubmit.set(true)">Submit Pre-Order</button>
+        }
+      </section>
+    }
+
+    @if (updatedAt()) {
+      <p class="updated">Updated at {{ updatedAt() | date:'HH:mm:ss' }} <button type="button" (click)="refresh()">Refresh</button></p>
+    }
+    @if (refreshError()) { <p class="refresh-error">{{ refreshError() }}</p> }
+  </main>
+}
+
+@if (confirmSubmit()) {
+  <app-modal class="group-submit-modal" width="640px" title="Submit Pre-Order" (closed)="confirmSubmit.set(false)">
+    <p class="submit-copy">Send this consolidated order to the restaurant? After submitting, the group pre-order cannot be changed.</p>
+    <div class="submit-total">
+      <span>Grand Total</span>
+      <strong>{{ consolidated().total | currency }}</strong>
+    </div>
+    <div modal-actions>
+      <button class="secondary-action" type="button" (click)="confirmSubmit.set(false)">Cancel</button>
+      <button class="primary-action" type="button" [disabled]="submitPending()" (click)="submit()">{{ submitPending() ? 'Submitting…' : 'Submit' }}</button>
+    </div>
+  </app-modal>
+}
+
+@if (submitSuccess()) {
+  <app-modal class="group-submit-success-modal" width="640px" title="Pre-order Submitted!" (closed)="submitSuccess.set(false)">
+    <p class="success-copy">
+      Your pre-order for the reservation
+      <strong>{{ invite()?.LocationAddress }}</strong>,
+      <strong>{{ invite()?.StartTime | date:'MMM d, y, h:mm a' }} - {{ invite()?.EndTime | date:'h:mm a' }}</strong>
+      has been successfully submitted.
+    </p>
+    <p class="success-copy">
+      We are checking the availability of your dishes, and you will receive confirmation soon.
+    </p>
+    <p class="success-copy">
+      You can modify or cancel your pre-order up to <strong>30 minutes</strong> before your reserved table time.
+    </p>
+    <p class="success-copy">Thank you for choosing us!</p>
+    <div modal-actions>
+      <button class="success-primary-action" type="button" (click)="viewReservations()">View Reservations</button>
+    </div>
+  </app-modal>
+}
+
+@if (removeTarget(); as target) {
+  <app-modal class="remove-guest-modal" width="520px" title="Remove Guest" (closed)="removeTarget.set(null)">
+    <p class="remove-guest-copy">
+      Are you sure you want to remove <strong>{{ target.name }}</strong> and their pre-order from this reservation?
+      This action cannot be undone.
+    </p>
+    <div modal-actions>
+      <button class="remove-cancel-action" type="button" (click)="removeTarget.set(null)">Cancel</button>
+      <button class="remove-confirm-action" type="button" (click)="removeGuest()">Remove Guest</button>
+    </div>
+  </app-modal>
+}

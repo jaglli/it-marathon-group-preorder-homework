@@ -1,0 +1,55 @@
+@use 'app/shared/styles/abstracts/colors' as color;
+
+.assistant {
+  margin: 0 2.5rem 2rem;
+  border: 1px solid color.$green-150;
+  border-radius: 16px;
+  background: color.$neutral-0;
+  box-shadow: 0 4px 14px rgba(35, 35, 35, .06);
+  overflow: hidden;
+}
+.assistant-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+  border: 0;
+  background: color.$green-100;
+  color: color.$neutral-900;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.assistant-toggle small { display: block; margin-top: 3px; color: color.$neutral-600; }
+.assistant-icon { color: color.$green-600; font-size: 24px; }
+.chevron { margin-left: auto; color: color.$green-800; font-size: 22px; }
+.assistant-panel { padding: 20px 22px 22px; }
+.assistant-panel > label { display: block; margin-bottom: 8px; color: color.$neutral-700; font-weight: 600; }
+input, select {
+  box-sizing: border-box;
+  border: 1px solid color.$neutral-200;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: color.$neutral-0;
+  color: color.$neutral-900;
+  font: inherit;
+}
+.assistant-panel > input { width: 100%; }
+.assistant-options { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: color.$neutral-600; font-size: 14px; }
+.assistant-options input { width: 100px; }
+.clear-button { margin-left: auto; border: 0; background: none; color: color.$green-600; cursor: pointer; font: inherit; font-weight: 600; }
+.recommendations > p { margin: 20px 0 10px; color: color.$neutral-700; font-weight: 600; }
+.recommendation { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid color.$neutral-100; }
+.recommendation img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+.recommendation div { flex: 1; min-width: 0; }
+.recommendation strong, .recommendation span { display: block; }
+.recommendation strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recommendation span { margin-top: 3px; color: color.$neutral-600; font-size: 13px; }
+.recommendation button { border: 0; border-radius: 8px; padding: 9px 16px; background: color.$green-600; color: color.$neutral-0; cursor: pointer; font: inherit; font-weight: 600; }
+.empty { margin: 20px 0 0; color: color.$neutral-600; }
+@media (max-width: 640px) {
+  .assistant { margin: 0 .5rem 1.5rem; }
+  .assistant-options { align-items: stretch; flex-wrap: wrap; }
+  .assistant-options select { flex: 1; min-width: 140px; }
+}

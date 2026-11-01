@@ -10,6 +10,8 @@ import { DishSortingLabels, DishTypeLabels } from '@app/shared/mappers/dish-enum
 import { DishModalComponent } from '@app/components/dish-modal/dish-modal.component';
 import { PreOrdersService } from '@app/services/pre-orders/pre-orders.service';
 import {ToastService} from '@app/services/toast/toast.service';
+import { GroupOrdersService } from '@app/services/group-orders/group-orders.service';
+import { DishAssistantComponent } from '@app/components/dish-assistant/dish-assistant.component';
 
 @Component({
   selector: 'app-menu-page',
@@ -18,7 +20,8 @@ import {ToastService} from '@app/services/toast/toast.service';
     RouterModule,
     DishCardComponent,
     MainCoverImageComponent,
-    DishModalComponent
+    DishModalComponent,
+    DishAssistantComponent
   ],
   templateUrl: './menu-page.component.html',
   styleUrl: './menu-page.component.scss',
@@ -33,6 +36,7 @@ export class MenuPageComponent implements OnInit {
   isPreOrderEnabled = false;
   preOrderReservationId?: string;
   preOrderReservationLabel?: string;
+  isGroupPreOrder = false;
 
   sortOptions = Object.values(DishSort);
   sortLabels = DishSortingLabels;
@@ -47,10 +51,12 @@ export class MenuPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private  readonly orderService = inject(PreOrdersService);
+  private readonly groupOrdersService = inject(GroupOrdersService, { optional: true });
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       const preOrder = params['preOrder'];
+      this.isGroupPreOrder = params['groupPreOrder'] === 'true';
       this.isPreOrderEnabled = !!preOrder;
       if (this.isPreOrderEnabled) {
         this.preOrderReservationId = params['reservationId'];
@@ -78,7 +84,12 @@ export class MenuPageComponent implements OnInit {
     const category = this.selectedCategory ?? undefined;
     const sort = this.selectedSort;
 
-    this.dishesService.getDishes(category, sort).subscribe((data) => {
+    const groupOrdersService = this.groupOrdersService;
+    const dishes$ = this.isGroupPreOrder && this.preOrderReservationId && groupOrdersService
+      ? groupOrdersService.getOwnerMenu$(this.preOrderReservationId)
+      : this.dishesService.getDishes(category, sort);
+
+    dishes$.subscribe((data) => {
       this.dishes = data.map((dish) => ({
         ...dish,
         imageUrl: dish.imageUrl || 'assets/img/dish.png',
@@ -139,6 +150,21 @@ export class MenuPageComponent implements OnInit {
   }
 
   addDishToCart(dish: DishListResponse): void {
+    if (this.isGroupPreOrder && this.preOrderReservationId) {
+      const groupOrdersService = this.groupOrdersService;
+      if (!groupOrdersService) {
+        this.toast.error('Group pre-order service is unavailable.', 'Error');
+        return;
+      }
+      groupOrdersService
+        .addOwnerDish$(this.preOrderReservationId, dish)
+        .subscribe({
+          next: () => this.toast.success('Dish added to group pre-order.', 'Success'),
+          error: (error) => this.toast.error((error as Error).message, 'Error'),
+        });
+      return;
+    }
+
     this.orderService
       .addDishToPreOrderByReservationId(this.preOrderReservationId!, dish, 1)
       .subscribe({

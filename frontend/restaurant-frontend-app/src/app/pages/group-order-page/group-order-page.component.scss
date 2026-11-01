@@ -1,0 +1,179 @@
+@use 'app/shared/styles/abstracts/colors' as color;
+
+:host {
+  display: block;
+  min-height: calc(100dvh - 68px);
+  background: color.$bg-yellow;
+}
+
+.page { max-width: 1180px; margin: 0 auto; padding: 48px 40px 72px; }
+.page-header { display: flex; justify-content: space-between; gap: 32px; align-items: end; margin-bottom: 28px; }
+.eyebrow { color: color.$green-600; font-size: 14px; font-weight: 600; letter-spacing: .04em; margin: 0 0 8px; text-transform: uppercase; }
+h1 { margin: 0; color: color.$neutral-900; font-size: clamp(28px, 4vw, 44px); font-weight: 500; line-height: 1.15; }
+.page-header p { margin: 10px 0 0; color: color.$neutral-600; }
+.header-meta { display: grid; justify-items: end; gap: 10px; text-align: right; white-space: nowrap; }
+.status { color: color.$green-800; font-weight: 600; }
+.header-meta button, .summary button, .error-state button {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 20px;
+  background: color.$green-600;
+  color: color.$neutral-0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+.header-meta button:hover, .summary button:hover, .error-state button:hover { background: color.$green-800; }
+.notice { margin: 0 0 24px; padding: 15px 18px; border: 1px solid color.$orange-400; border-radius: 10px; background: color.$orange-100; color: color.$neutral-700; }
+.participants { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.summary { margin-top: 28px; padding: 28px; border: 1px solid color.$green-150; background: color.$green-100; border-radius: 16px; }
+.summary h2 { margin: 0 0 18px; font-size: 24px; font-weight: 500; }
+.summary ul { display: grid; gap: 10px; padding-left: 20px; color: color.$neutral-700; }
+.grand-total { display: flex; justify-content: space-between; margin: 22px 0 20px; padding-top: 18px; border-top: 1px solid color.$green-150; font-size: 20px; }
+.summary button:disabled { opacity: .5; cursor: not-allowed; }
+.updated, .refresh-error, .state, .empty-state { text-align: center; color: color.$neutral-600; }
+.updated { margin-top: 24px; }
+.updated button { border: 0; background: none; color: color.$green-600; cursor: pointer; font: inherit; font-weight: 600; }
+.refresh-error { color: color.$red-400; }
+.error-state { text-align: center; }
+.error-state p { margin-bottom: 16px; }
+
+.submit-copy {
+  margin: 0;
+  color: color.$neutral-600;
+  line-height: 1.55;
+}
+.submit-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+  border-top: 1px solid color.$neutral-200;
+  border-bottom: 1px solid color.$neutral-200;
+  color: color.$neutral-700;
+  font-size: 16px;
+}
+.submit-total strong {
+  color: color.$green-800;
+  font-size: 24px;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-card {
+  gap: 20px;
+  padding: 28px 32px 24px;
+  border-radius: 20px;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-title {
+  padding-right: 28px;
+  font-size: 24px;
+  line-height: 1.25;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-actions {
+  justify-content: flex-end;
+  gap: 12px;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-actions button {
+  min-width: 132px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-actions .secondary-action {
+  background: color.$neutral-100;
+  color: color.$neutral-700;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-actions .primary-action {
+  background: color.$green-600;
+  color: color.$neutral-0;
+}
+:host ::ng-deep app-modal.group-submit-modal .modal-actions button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+:host ::ng-deep app-modal.group-submit-success-modal .modal-card {
+  gap: 18px;
+  padding: 28px 32px 24px;
+  border-radius: 20px;
+}
+:host ::ng-deep app-modal.group-submit-success-modal .modal-title {
+  padding-right: 28px;
+  font-size: 24px;
+  line-height: 1.25;
+}
+.success-copy {
+  margin: 0;
+  color: color.$neutral-700;
+  line-height: 1.6;
+}
+:host ::ng-deep app-modal.group-submit-success-modal .modal-actions {
+  justify-content: stretch;
+}
+:host ::ng-deep app-modal.group-submit-success-modal .success-primary-action {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 13px 18px;
+  background: color.$green-600;
+  color: color.$neutral-0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.remove-guest-copy {
+  margin: 0;
+  color: color.$neutral-700;
+  line-height: 1.6;
+}
+:host ::ng-deep app-modal.remove-guest-modal .modal-card {
+  gap: 20px;
+  padding: 28px 32px 24px;
+  border-radius: 20px;
+}
+:host ::ng-deep app-modal.remove-guest-modal .modal-title {
+  padding-right: 28px;
+  font-size: 24px;
+  line-height: 1.25;
+}
+:host ::ng-deep app-modal.remove-guest-modal .modal-actions {
+  justify-content: flex-end;
+  gap: 12px;
+}
+:host ::ng-deep app-modal.remove-guest-modal .modal-actions button {
+  min-width: 132px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+:host ::ng-deep app-modal.remove-guest-modal .remove-cancel-action {
+  background: color.$neutral-100;
+  color: color.$neutral-700;
+}
+:host ::ng-deep app-modal.remove-guest-modal .remove-confirm-action {
+  background: color.$red-400;
+  color: color.$neutral-0;
+}
+:host ::ng-deep app-modal.remove-guest-modal .remove-cancel-action:hover {
+  background: color.$neutral-200;
+}
+:host ::ng-deep app-modal.remove-guest-modal .remove-confirm-action:hover {
+  background: color.$neutral-900;
+}
+@media (max-width: 640px) {
+  .page { padding: 32px 16px 48px; }
+  .page-header { display: block; }
+  .header-meta { justify-items: start; text-align: left; margin-top: 20px; }
+  .participants { grid-template-columns: 1fr; }
+  .summary { padding: 20px; }
+  :host ::ng-deep app-modal.group-submit-modal .modal-card { padding: 24px 20px 20px; }
+  :host ::ng-deep app-modal.group-submit-modal .modal-actions { flex-direction: column-reverse; }
+  :host ::ng-deep app-modal.group-submit-modal .modal-actions button { width: 100%; }
+  :host ::ng-deep app-modal.group-submit-success-modal .modal-card { padding: 24px 20px 20px; }
+  :host ::ng-deep app-modal.remove-guest-modal .modal-card { padding: 24px 20px 20px; }
+  :host ::ng-deep app-modal.remove-guest-modal .modal-actions { flex-direction: column-reverse; }
+  :host ::ng-deep app-modal.remove-guest-modal .modal-actions button { width: 100%; }
+}

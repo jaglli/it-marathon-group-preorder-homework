@@ -17,11 +17,19 @@ export const tokenInterceptor: HttpInterceptorFn = (
 ) => {
   const toastr = inject(ToastService);
 
-  // IMPORTANT: do not modify Guest endpoints at all.
-  // Guest flow uses a different token (guest session token) and we must not touch the body.
-  // Otherwise we break POST /guest/sessions payload.
+  // Guest flows may provide their own session token. Owner calls to the same
+  // endpoints use the Cognito token, so only fill in a missing header.
   if (req.url.includes('/guest/')) {
-    return next(req).pipe(
+    const guestRequest = req.headers.has('Authorization')
+      ? req
+      : (() => {
+        const tokens = inject(AuthenticationService).getTokens();
+        return tokens?.idToken
+          ? req.clone({ setHeaders: { Authorization: 'Bearer ' + tokens.idToken } })
+          : req;
+      })();
+
+    return next(guestRequest).pipe(
       catchError((error: HttpErrorResponse) => {
         console.log(error);
 

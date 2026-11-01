@@ -1,0 +1,15 @@
+.card { background: white; border: 1px solid #e6e9e4; border-radius: 16px; padding: 22px; box-shadow: 0 4px 16px rgba(35, 35, 35, .07); }
+.card-heading, .item, .subtotal { display: flex; align-items: center; gap: 12px; }
+.title { flex: 1; margin: 0; font-size: 18px; font-weight: 500; }
+.chip { border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 600; }
+.submitted { color: #176b3a; background: #e4f4e9; }
+.pending { color: #785600; background: #fff1c7; }
+.items { list-style: none; padding: 0; margin: 20px 0 10px; }
+.item { min-width: 0; padding: 8px 0; }
+.avatar { flex: 0 0 40px; width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+.initial { display: grid; place-items: center; background: #e8f0e8; }
+.name { flex: 1; margin: 0; overflow-wrap: anywhere; }
+.qty, .price { margin: 0; white-space: nowrap; }
+.subtotal { justify-content: space-between; border-top: 1px solid #e5e5e5; padding-top: 14px; margin: 14px 0 0; font-weight: 600; }
+.empty { color: #737373; margin: 18px 0; }
+.remove { margin-top: 14px; border: 0; background: transparent; color: #a52c2c; cursor: pointer; padding: 0; }
