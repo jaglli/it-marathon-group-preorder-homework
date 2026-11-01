@@ -101,6 +101,13 @@ public class DishRepository : IDishRepository
         return resultDishes.Values.ToList();
     }
 
+    public async Task<IEnumerable<Dish>> GetAllDishesAsync()
+    {
+        return await _dynamoDbContext
+            .ScanAsync<Dish>(new List<ScanCondition>(), DynamoConfig.ScanConfig(DishTableName))
+            .GetRemainingAsync();
+    }
+
     public async Task SaveDishAsync(Dish dish)
     {
         await _dynamoDbContext.SaveAsync(dish, DynamoConfig.SaveConfig(ResourceNames.DishesTableName));

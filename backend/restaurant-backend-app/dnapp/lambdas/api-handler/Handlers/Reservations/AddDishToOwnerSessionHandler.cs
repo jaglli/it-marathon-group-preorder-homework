@@ -38,8 +38,7 @@ public class AddDishToOwnerSessionHandler(IGuestSessionService service) : IApiRe
 
         try
         {
-            var sessionId = await service.GetOwnerSessionIdAsync(userId, reservationId);
-            await service.AddDishAsync(sessionId, body.DishId, body.Quantity);
+            await service.AddOwnerDishAsync(userId, reservationId, body.DishId, body.Quantity);
             return ResponseBuilder.CreateSuccessResponse("Dish added successfully.");
         }
         catch (ReservationNotFoundException e) { return ResponseBuilder.CreateErrorResponse(404, e.Message, context.Logger); }

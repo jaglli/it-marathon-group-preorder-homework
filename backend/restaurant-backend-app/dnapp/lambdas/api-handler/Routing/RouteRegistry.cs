@@ -195,6 +195,7 @@ public static class RouteRegistry
             new RouteHandler(new Route(HttpMethods.GET, "/guest/invites/{token}"), ActivatorUtilities.CreateInstance<GetGroupReservationHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}/invite-token"), ActivatorUtilities.CreateInstance<GetInviteTokenHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}/guest-session-id"), ActivatorUtilities.CreateInstance<GetOwnerGuestSessionIdHandler>(provider)),
+            new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}/guest-session/menu"), ActivatorUtilities.CreateInstance<GetOwnerSessionMenuHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.POST, "/reservations/{reservationId}/guest-session/dishes"), ActivatorUtilities.CreateInstance<AddDishToOwnerSessionHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.POST, "/group-reservations/{groupReservationId}/submit"), ActivatorUtilities.CreateInstance<SubmitGroupReservationHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/guest/groups/{groupReservationId}/sessions"), ActivatorUtilities.CreateInstance<GetGroupSessionsHandler>(provider)),
@@ -222,4 +223,3 @@ public static class RouteRegistry
         return allRoutes;
     }
 }
-

@@ -74,6 +74,16 @@ public class SignInHandler : IApiRequestHandler
             context.Logger.LogLine("Invalid email or password");
             return null;
         }
+        catch (UserNotFoundException)
+        {
+            context.Logger.LogLine("Invalid email or password");
+            return null;
+        }
+        catch (AmazonCognitoIdentityProviderException exception)
+        {
+            context.Logger.LogError($"Cognito sign-in failed: {exception.ErrorCode} - {exception.Message}");
+            return null;
+        }
     }
 
     private static bool TryDeserializeRequest(APIGatewayProxyRequest request, out SignInRequest? signInRequest)
